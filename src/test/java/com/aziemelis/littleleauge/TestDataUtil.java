@@ -1,5 +1,6 @@
 package com.aziemelis.littleleauge;
 
+import com.aziemelis.littleleauge.domain.dto.PlayerDto;
 import com.aziemelis.littleleauge.domain.entities.PlayerEntity;
 
 public class TestDataUtil {
@@ -7,6 +8,15 @@ public class TestDataUtil {
 
     public static PlayerEntity createTestPlayerEntity1() {
         return PlayerEntity.builder()
+                .firstName("Anthony")
+                .lastName("Edwards")
+                .fullName("Anthony Edwards")
+                .active(true)
+                .build();
+    }
+
+    public static PlayerDto createTestPlayerDto1() {
+        return PlayerDto.builder()
                 .firstName("Anthony")
                 .lastName("Edwards")
                 .fullName("Anthony Edwards")

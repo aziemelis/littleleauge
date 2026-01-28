@@ -1,6 +1,7 @@
 package com.aziemelis.littleleauge.controllers;
 
 import com.aziemelis.littleleauge.TestDataUtil;
+import com.aziemelis.littleleauge.domain.dto.PlayerDto;
 import com.aziemelis.littleleauge.domain.entities.PlayerEntity;
 import com.aziemelis.littleleauge.services.PlayerService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -98,5 +99,170 @@ public class PlayerControllerIntegrationTests {
         ).andExpect(
                 MockMvcResultMatchers.jsonPath("$[0].active").value(true)
         );
+    }
+
+    @Test
+    public void testThatGetPlayerReturnsHttpStatus200WhenPlayerExists() throws Exception {
+        PlayerEntity playerEntity = TestDataUtil.createTestPlayerEntity1();
+        playerService.save(playerEntity);
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.get("/players/" + playerEntity.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+        ).andExpect(
+                MockMvcResultMatchers.status().isOk()
+        );
+    }
+
+    @Test
+    public void testThatGetPlayerReturnsHttpStatus404WhenPlayerDoesNotExist() throws Exception {
+        mockMvc.perform(
+                MockMvcRequestBuilders.get("/players/99")
+                        .contentType(MediaType.APPLICATION_JSON)
+        ).andExpect(
+                MockMvcResultMatchers.status().isNotFound()
+        );
+    }
+
+    @Test
+    public void testThatGetPlayerReturnsPlayerWhenDoesExist() throws Exception {
+        PlayerEntity playerEntity = TestDataUtil.createTestPlayerEntity1();
+        playerService.save(playerEntity);
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.get("/players/" + playerEntity.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+        ).andExpect(
+                MockMvcResultMatchers.jsonPath("$.id").value(1)
+        ).andExpect(
+                MockMvcResultMatchers.jsonPath("$.firstName").value("Anthony")
+        ).andExpect(
+                MockMvcResultMatchers.jsonPath("$.lastName").value("Edwards")
+        ).andExpect(
+                MockMvcResultMatchers.jsonPath("$.fullName").value("Anthony Edwards")
+        ).andExpect(
+                MockMvcResultMatchers.jsonPath("$.active").value(true)
+        );
+    }
+
+    @Test
+    public void testThatUpdatePlayerReturnsHttpStatus200WhenPlayerExists() throws Exception {
+        PlayerEntity playerEntity = TestDataUtil.createTestPlayerEntity1();
+        PlayerEntity savedPlayerEntity = playerService.save(playerEntity);
+
+        PlayerDto testPlayerDto = TestDataUtil.createTestPlayerDto1();
+        String playerDtoJson = objectMapper.writeValueAsString(testPlayerDto);
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.put("/players/" + savedPlayerEntity.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(playerDtoJson)
+        ).andExpect(
+                MockMvcResultMatchers.status().isOk()
+        );
+    }
+
+    @Test
+    public void testThatUpdatePlayerReturnsHttpStatus404WhenPlayerDoesNotExist() throws Exception {
+        PlayerEntity playerEntity = TestDataUtil.createTestPlayerEntity1();
+        String playerDtoJson = objectMapper.writeValueAsString(playerEntity);
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.put("/players/99")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(playerDtoJson)
+        ).andExpect(
+                MockMvcResultMatchers.status().isNotFound()
+        );
+    }
+
+    @Test
+    public void testThatUpdatePlayerReturnsExistingPlayer() throws Exception {
+        PlayerEntity playerEntity = TestDataUtil.createTestPlayerEntity1();
+        PlayerEntity savedPlayerEntity = playerService.save(playerEntity);
+
+        PlayerDto testPlayerDto = TestDataUtil.createTestPlayerDto1();
+        testPlayerDto.setId(savedPlayerEntity.getId());
+
+        String playerDtoJson = objectMapper.writeValueAsString(testPlayerDto);
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.put("/players/" + savedPlayerEntity.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(playerDtoJson)
+        ).andExpect(
+                MockMvcResultMatchers.jsonPath("$.id").value(savedPlayerEntity.getId())
+        ).andExpect(
+                MockMvcResultMatchers.jsonPath("$.firstName").value(savedPlayerEntity.getFirstName())
+        ).andExpect(
+                MockMvcResultMatchers.jsonPath("$.lastName").value(savedPlayerEntity.getLastName())
+        ).andExpect(
+                MockMvcResultMatchers.jsonPath("$.fullName").value(savedPlayerEntity.getFullName())
+        ).andExpect(
+                MockMvcResultMatchers.jsonPath("$.active").value(savedPlayerEntity.getActive())
+        );
+    }
+
+    @Test
+    public void testThatPutPlayerReturnsHttpStatus200WhenPlayerExists() throws Exception {
+        PlayerEntity playerEntity = TestDataUtil.createTestPlayerEntity1();
+        PlayerEntity savedPlayerEntity = playerService.save(playerEntity);
+
+        PlayerDto testPlayerDto = TestDataUtil.createTestPlayerDto1();
+        testPlayerDto.setFullName("Updated Full Name");
+        String playerDtoJson = objectMapper.writeValueAsString(testPlayerDto);
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.patch("/players/" + savedPlayerEntity.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(playerDtoJson)
+        ).andExpect(
+                MockMvcResultMatchers.status().isOk()
+        );
+    }
+
+    @Test
+    public void testThatPatchPlayerUpdateExistingPlayerReturnsUpdatedPlayer() throws Exception {
+        PlayerEntity playerEntity = TestDataUtil.createTestPlayerEntity1();
+        PlayerEntity savedPlayerEntity = playerService.save(playerEntity);
+
+        PlayerDto testPlayerDto = TestDataUtil.createTestPlayerDto1();
+        testPlayerDto.setFullName("Updated Full Name");
+        String playerDtoJson = objectMapper.writeValueAsString(testPlayerDto);
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.patch("/players/" + savedPlayerEntity.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(playerDtoJson)
+        ).andExpect(
+                MockMvcResultMatchers.jsonPath("$.id").value(savedPlayerEntity.getId())
+        ).andExpect(
+                MockMvcResultMatchers.jsonPath("$.firstName").value(savedPlayerEntity.getFirstName())
+        ).andExpect(
+                MockMvcResultMatchers.jsonPath("$.lastName").value(savedPlayerEntity.getLastName())
+        ).andExpect(
+                MockMvcResultMatchers.jsonPath("$.fullName").value("Updated Full Name")
+        ).andExpect(
+                MockMvcResultMatchers.jsonPath("$.active").value(savedPlayerEntity.getActive())
+        );
+    }
+
+    @Test
+    public void testThatDeletePlayerReturnsHttpStatus204WhenPlayerExists() throws Exception {
+        PlayerEntity playerEntity = TestDataUtil.createTestPlayerEntity1();
+        PlayerEntity savedPlayerEntity = playerService.save(playerEntity);
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.delete("/players/" + savedPlayerEntity.getId())
+                        .content(MediaType.APPLICATION_JSON_VALUE)
+        ).andExpect(MockMvcResultMatchers.status().isNoContent());
+    }
+
+    @Test
+    public void testThatDeletePlayerReturnsHttpStatus204WhenPlayerDoesNotExist() throws Exception {
+        mockMvc.perform(
+                MockMvcRequestBuilders.delete("/players/99")
+                        .content(MediaType.APPLICATION_JSON_VALUE)
+        ).andExpect(MockMvcResultMatchers.status().isNoContent());
     }
 }

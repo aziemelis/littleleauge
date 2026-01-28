@@ -49,4 +49,27 @@ public class PlayerEntityRepositoryIntegrationTests {
                 .hasSize(3)
                 .containsExactly(playerEntity1, playerEntity2, playerEntity3);
     }
+
+    @Test
+    public void testThatPlayerCanBeUpdated() {
+        PlayerEntity playerEntity1 = TestDataUtil.createTestPlayerEntity1();
+        underTest.save(playerEntity1);
+
+        playerEntity1.setFirstName("UPDATED");
+        underTest.save(playerEntity1);
+
+        Optional<PlayerEntity> result = underTest.findById(playerEntity1.getId());
+        assertThat(result).isPresent();
+        assertThat(result.get()).isEqualTo(playerEntity1);
+    }
+
+    @Test
+    public void testThatPlayerCanBeDeleted() {
+        PlayerEntity playerEntity1 = TestDataUtil.createTestPlayerEntity1();
+        underTest.save(playerEntity1);
+        underTest.deleteById(playerEntity1.getId());
+
+        Optional<PlayerEntity> result = underTest.findById(playerEntity1.getId());
+        assertThat(result).isEmpty();
+    }
 }
